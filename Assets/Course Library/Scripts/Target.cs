@@ -14,7 +14,7 @@ namespace Course_Library.Scripts
         private const float XRange = 4;
         private const float YSpawnPos = -1;
         private const int PointValue = 5;
-
+        
         [SerializeField] private ParticleSystem particles;
     
         // Start is called before the first frame update
@@ -52,16 +52,33 @@ namespace Course_Library.Scripts
                 {
                     _gameManager.UpdateScore(PointValue);
                 }
-                else _gameManager.GameOver();
+                else
+                {
+                    _gameManager.LoseLife(1);
+                    _gameManager.GameOver();
+                }
             }
         }
         
         private void OnTriggerEnter(Collider other)
         {
-            Destroy(gameObject);
-            if (!CompareTag("Bad"))
+            if (_gameManager.IsGameActive())
             {
-                _gameManager.GameOver();
+                Destroy(gameObject);
+                Instantiate(particles, transform.position, particles.transform.rotation);
+                if (gameObject.CompareTag("Good") && other.gameObject.CompareTag("Player"))
+                {
+                    _gameManager.UpdateScore(PointValue);
+                }
+                else if (gameObject.CompareTag("Bad") && other.gameObject.CompareTag("Sensor"))
+                {
+                    _gameManager.GetDestroyAudio().Play();
+                }
+                else
+                {
+                    _gameManager.LoseLife(1);
+                    _gameManager.GameOver();
+                }
             }
         }
     }
